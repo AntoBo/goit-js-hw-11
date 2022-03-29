@@ -4,7 +4,7 @@ body {
   line-height: 1.5;
   background-color: #fff;
   color: #424242;
-  max-width: 960px;
+  //   max-width: 960px;
   padding: 16px;
 }
 .search-form {
@@ -24,4 +24,10 @@ body {
   & button {
     // background-color: rgb(193, 193, 193);
   }
+}
+
+.load-more {
+  padding: 5px;
+  display: block;
+  margin: 0 auto;
 }
