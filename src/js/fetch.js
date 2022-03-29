@@ -1,16 +1,19 @@
 import axios from 'axios';
 
 axios.defaults.baseURL = 'https://pixabay.com/api/';
+const perPage = 3;
 
-export default async function getPictures(query) {
+export default async function getPictures(query, page) {
   const options = {
     params: {
       key: '26342671-26c26899736dd731f47ba4106',
       q: query,
-      per_page: 5,
+      per_page: perPage,
       image_type: 'photo',
       orientation: 'horizontal',
       safesearch: true,
+      order: 'popular',
+      page: page,
     },
   };
 

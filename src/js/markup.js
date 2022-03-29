@@ -1,8 +1,13 @@
-import '../sass/main.scss';
 import cardTemplate from '../hbs/card.hbs';
 
 const galleryEl = document.querySelector('.gallery');
 
-function draw(data) {}
+export function newDraw(data) {
+  const markup = data.hits.map(cardTemplate);
+  galleryEl.innerHTML = markup.join('');
+}
 
-function appendDraw(data) {}
+export function appendDraw(data) {
+  const markup = data.hits.map(cardTemplate);
+  galleryEl.insertAdjacentHTML('beforeend', markup.join(''));
+}
