@@ -20,10 +20,6 @@ body {
       font-size: 14px;
     }
   }
-
-  & button {
-    // background-color: rgb(193, 193, 193);
-  }
 }
 
 .info {
@@ -32,6 +28,7 @@ body {
 
 .load-more {
   padding: 5px;
+  min-width: 150px;
   display: block;
   margin: 0 auto;
 }

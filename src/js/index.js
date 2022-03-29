@@ -1,10 +1,12 @@
 import '../sass/main.scss';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import { Block } from 'notiflix/build/notiflix-block-aio';
+
 import { notifyOptions } from './notifyOptions.js';
 import getPictures from './fetch.js';
 import * as Markup from './markup';
 
-Notify.success('hello!', notifyOptions);
+// Notify.success('hello!', notifyOptions);
 //get controls
 const formSearch = document.querySelector('#search-form');
 const btnLoadMore = document.querySelector('.load-more');
@@ -14,6 +16,8 @@ let page = 1;
 formSearch.addEventListener('submit', onSearchSubmit);
 btnLoadMore.addEventListener('click', onLoadMoreClick);
 
+// Block.standard('.load-more');
+
 async function onSearchSubmit(event) {
   event.preventDefault();
   query = formSearch.searchQuery.value;
@@ -21,7 +25,12 @@ async function onSearchSubmit(event) {
   //async part
   try {
     const data = await getPictures(query, 1);
-    console.log('drawing data: ', data);
+    if (data.totalHits === 0) {
+      Notify.warning('Давай краще пошукємо щось інше)', notifyOptions);
+      throw new Error('data is 0 items');
+    }
+    Notify.success(`Hooray! We found ${data.totalHits} images.`, notifyOptions);
+
     //draw data here
     Markup.newDraw(data);
   } catch (error) {
