@@ -32,3 +32,20 @@ body {
   display: block;
   margin: 0 auto;
 }
+
+.end-results {
+  padding: 10px;
+  margin: 20px 100px;
+  font-size: 16px;
+  font-weight: 600;
+  border: 1px solid #b8b8b8;
+  // color: violet;
+  text-align: center;
+}
+
+.hidden {
+  // display: none;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
