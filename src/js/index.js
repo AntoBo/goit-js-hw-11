@@ -6,40 +6,40 @@ import * as Markup from './markup';
 
 //get controls
 const formSearch = document.querySelector('#search-form');
-formSearch.addEventListener('submit', onSearchSubmit);
-
 const btnLoadMore = document.querySelector('.load-more');
-btnLoadMore.addEventListener('click', onLoadMoreClick);
 const endResultsText = document.querySelector('.end-results');
+
+formSearch.addEventListener('submit', onSearchSubmit);
+btnLoadMore.addEventListener('click', onLoadMoreClick);
 
 //global vars
 let query = '';
-let page = 1;
+let page = null;
 let cardsCount = 0;
 
+const btnContent = {
+  LOAD_MORE: 'Load more!',
+  LOADING: 'Loading...',
+};
+
+//click handlers
 async function onSearchSubmit(event) {
   event.preventDefault();
   query = formSearch.searchQuery.value;
 
   //async part
   try {
-    const data = await getPictures(query, 1);
-    if (data.totalHits === 0) {
-      Notify.warning('Давай краще пошукємо щось інше)', notifyOptions);
-      throw new Error('data is 0 items');
-    }
+    page = 1;
 
+    //fetch data
+    const data = await getPictures(query, page);
+
+    //check if search result is not 0 and notify
+    dataFoundAlert(data);
+
+    //update UI controls
     cardsCount = data.hits.length;
-    console.log('cardsCount is: ', cardsCount);
-    // ifAllCardsDisplayed(data);
-    if (cardsCount >= data.totalHits) {
-      btnLoadMore.classList.add('hidden');
-      endResultsText.classList.remove('hidden');
-    } else {
-      endResultsText.classList.add('hidden');
-      btnLoadMore.classList.remove('hidden');
-    }
-    Notify.success(`Hooray! We found ${data.totalHits} images.`, notifyOptions);
+    updateControls(data);
 
     //draw data here
     Markup.newDraw(data);
@@ -47,34 +47,51 @@ async function onSearchSubmit(event) {
     console.log('query failed with error: ', error);
   }
 }
-
 async function onLoadMoreClick(event) {
-  page += 1;
-  Markup.toggleOnLoadBtn(event.target);
-
   //async part
   try {
-    const data = await getPictures(query, page);
-    cardsCount += data.hits.length;
-    console.log('cardsCount is: ', cardsCount);
+    toggleLoadBtn(event.target);
+    page += 1;
 
-    // ifAllCardsDisplayed(data);
-    if (cardsCount >= data.totalHits) {
-      btnLoadMore.classList.add('hidden');
-      endResultsText.classList.remove('hidden');
-    } else {
-      endResultsText.classList.add('hidden');
-    }
+    //fetch more data
+    const data = await getPictures(query, page);
+
+    //update UI controls
+    cardsCount += data.hits.length;
+    updateControls(data);
 
     //draw data here
     Markup.appendDraw(data);
-    Markup.toggleOnLoadBtn(event.target);
+    toggleLoadBtn(event.target);
   } catch (error) {
     console.log('query failed with error: ', error);
   }
 }
 
-// function ifAllCardsDisplayed(data) {
-//   console.log('data.totalHits is ', data.totalHits);
-//   return cardsCount >= data.totalHits;
-// }
+//other maintaining functions
+function updateControls(data) {
+  if (cardsCount >= data.totalHits) {
+    btnLoadMore.classList.add('hidden');
+    endResultsText.classList.remove('hidden');
+  } else {
+    endResultsText.classList.add('hidden');
+    btnLoadMore.classList.remove('hidden');
+  }
+}
+function toggleLoadBtn(button) {
+  if (button.disabled) {
+    button.disabled = false;
+    button.textContent = btnContent.LOAD_MORE;
+  } else {
+    button.disabled = true;
+    button.textContent = btnContent.LOADING;
+  }
+}
+function dataFoundAlert(data) {
+  if (data.totalHits === 0) {
+    Notify.warning('Давай краще пошукємо щось інше)', notifyOptions);
+    throw new Error('data is 0 items');
+  } else {
+    Notify.success(`Hooray! We found ${data.totalHits} images.`, notifyOptions);
+  }
+}
