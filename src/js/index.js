@@ -1,6 +1,8 @@
 import '../sass/main.scss';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { notifyOptions } from './notifyOptions.js';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 import getPictures from './fetch.js';
 import * as Markup from './markup';
 
@@ -11,6 +13,8 @@ const endResultsText = document.querySelector('.end-results');
 
 formSearch.addEventListener('submit', onSearchSubmit);
 btnLoadMore.addEventListener('click', onLoadMoreClick);
+
+let lightbox = new SimpleLightbox('.gallery a');
 
 //global vars
 let query = '';
@@ -43,6 +47,9 @@ async function onSearchSubmit(event) {
 
     //draw data here
     Markup.newDraw(data);
+
+    //upd lightbox
+    lightbox.refresh();
   } catch (error) {
     console.log('query failed with error: ', error);
   }
@@ -62,6 +69,9 @@ async function onLoadMoreClick(event) {
 
     //draw data here
     Markup.appendDraw(data);
+
+    //upd lightbox
+    lightbox.refresh();
     toggleLoadBtn(event.target);
   } catch (error) {
     console.log('query failed with error: ', error);
