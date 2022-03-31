@@ -20,8 +20,6 @@ export default async function getPictures(query, page) {
   try {
     const response = await axios.get('', options);
     const data = response.data;
-    console.log('data fetched');
-    // console.log(data);
     return data;
   } catch (error) {
     console.error('caugth in fetch.js, ', error);

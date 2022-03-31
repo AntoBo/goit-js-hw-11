@@ -1,48 +1,64 @@
 import '../sass/main.scss';
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import { notifyOptions } from './notifyOptions.js';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+import dataFoundAlert from './notify.js';
 import getPictures from './fetch.js';
 import * as Markup from './markup';
 
 //get controls
-const formSearch = document.querySelector('#search-form');
-const btnLoadMore = document.querySelector('.load-more');
-const endResultsText = document.querySelector('.end-results');
-
-formSearch.addEventListener('submit', onSearchSubmit);
-btnLoadMore.addEventListener('click', onLoadMoreClick);
-
+const el = {
+  formSearch: document.querySelector('#search-form'),
+  endResultsText: document.querySelector('.end-results'),
+  newSearchLink: document.querySelector('.new-search'),
+};
+const loadMoreEl = {
+  btn: document.querySelector('.load-more'),
+  content: {
+    LOAD_MORE: 'Load more!',
+    LOADING: 'Loading...',
+  },
+  toggle() {
+    if (this.btn.disabled) {
+      this.btn.disabled = false;
+      this.btn.textContent = this.content.LOAD_MORE;
+    } else {
+      this.btn.disabled = true;
+      this.btn.textContent = this.content.LOADING;
+    }
+  },
+};
 let lightbox = new SimpleLightbox('.gallery a');
 
-//global vars
-let query = '';
-let page = null;
-let cardsCount = 0;
+//listeners
+el.formSearch.addEventListener('submit', onSearchSubmit);
+el.newSearchLink.addEventListener('click', onNewSearchLinkClick);
+loadMoreEl.btn.addEventListener('click', onLoadMoreClick);
 
-const btnContent = {
-  LOAD_MORE: 'Load more!',
-  LOADING: 'Loading...',
+//search vars
+const search = {
+  query: '',
+  page: null,
+  cardsCount: 0,
 };
 
 //click handlers
+//search
 async function onSearchSubmit(event) {
   event.preventDefault();
-  query = formSearch.searchQuery.value;
+  search.query = el.formSearch.searchQuery.value;
 
   //async part
   try {
-    page = 1;
+    search.page = 1;
 
     //fetch data
-    const data = await getPictures(query, page);
+    const data = await getPictures(search.query, search.page);
 
     //check if search result is not 0 and notify
     dataFoundAlert(data);
 
     //update UI controls
-    cardsCount = data.hits.length;
+    search.cardsCount = data.hits.length;
     updateControls(data);
 
     //draw data here
@@ -54,17 +70,20 @@ async function onSearchSubmit(event) {
     console.log('query failed with error: ', error);
   }
 }
+//load more
 async function onLoadMoreClick(event) {
+  // window.scrollBy(0, -window.innerHeight);
+
   //async part
   try {
-    toggleLoadBtn(event.target);
-    page += 1;
+    loadMoreEl.toggle();
+    search.page += 1;
 
     //fetch more data
-    const data = await getPictures(query, page);
+    const data = await getPictures(search.query, search.page);
 
     //update UI controls
-    cardsCount += data.hits.length;
+    search.cardsCount += data.hits.length;
     updateControls(data);
 
     //draw data here
@@ -72,36 +91,30 @@ async function onLoadMoreClick(event) {
 
     //upd lightbox
     lightbox.refresh();
-    toggleLoadBtn(event.target);
+    loadMoreEl.toggle();
   } catch (error) {
     console.log('query failed with error: ', error);
   }
 }
+//scroll up and focus on input
+function onNewSearchLinkClick(event) {
+  event.preventDefault();
+  el.formSearch.searchQuery.focus({ preventScroll: true });
+  el.formSearch.reset();
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  });
+}
 
 //other maintaining functions
 function updateControls(data) {
-  if (cardsCount >= data.totalHits) {
-    btnLoadMore.classList.add('hidden');
-    endResultsText.classList.remove('hidden');
+  if (search.cardsCount >= data.totalHits) {
+    loadMoreEl.btn.classList.add('hidden');
+    el.endResultsText.classList.remove('hidden');
   } else {
-    endResultsText.classList.add('hidden');
-    btnLoadMore.classList.remove('hidden');
-  }
-}
-function toggleLoadBtn(button) {
-  if (button.disabled) {
-    button.disabled = false;
-    button.textContent = btnContent.LOAD_MORE;
-  } else {
-    button.disabled = true;
-    button.textContent = btnContent.LOADING;
-  }
-}
-function dataFoundAlert(data) {
-  if (data.totalHits === 0) {
-    Notify.warning('Давай краще пошукємо щось інше)', notifyOptions);
-    throw new Error('data is 0 items');
-  } else {
-    Notify.success(`Hooray! We found ${data.totalHits} images.`, notifyOptions);
+    el.endResultsText.classList.add('hidden');
+    loadMoreEl.btn.classList.remove('hidden');
   }
 }
