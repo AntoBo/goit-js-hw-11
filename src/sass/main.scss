@@ -54,6 +54,9 @@ body {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
+  &-item {
+    text-align: center;
+  }
 }
 
 .load-more {
